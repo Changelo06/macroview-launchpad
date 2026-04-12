@@ -22,8 +22,15 @@ const testimonials = [
 
 const Index = () => {
   const [showFloatingCta, setShowFloatingCta] = useState(false);
+  const [loading, setLoading] = useState(true);
   const reelRef = useRef<HTMLDivElement>(null);
   const reelInnerRef = useRef<HTMLDivElement>(null);
+
+  // Loading intro
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 2400);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowFloatingCta(true), 2000);
@@ -31,6 +38,7 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    if (loading) return;
     const waitForGsap = setInterval(() => {
       if (window.gsap && window.ScrollTrigger) {
         clearInterval(waitForGsap);
@@ -38,7 +46,7 @@ const Index = () => {
       }
     }, 100);
     return () => clearInterval(waitForGsap);
-  }, []);
+  }, [loading]);
 
   const initAnimations = () => {
     const gsap = window.gsap;
@@ -115,7 +123,31 @@ const Index = () => {
         scrollTrigger: { trigger: ".close-section", start: "top 60%" },
       }
     );
+
+    // Parallax smoke/glow orbs
+    gsap.utils.toArray(".parallax-orb").forEach((orb: any) => {
+      gsap.to(orb, {
+        y: -80,
+        ease: "none",
+        scrollTrigger: { trigger: orb.parentElement, start: "top bottom", end: "bottom top", scrub: true },
+      });
+    });
   };
+
+  // Loading screen
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-background">
+        {/* Glow ring behind text */}
+        <div className="loader-glow-ring absolute w-64 h-64 rounded-full" style={{ background: "radial-gradient(circle, hsl(242 95% 50% / 0.2), transparent 70%)" }} />
+        <div className="loader-glow-ring absolute w-48 h-48 rounded-full" style={{ background: "radial-gradient(circle, hsl(242 95% 40% / 0.15), transparent 70%)", animationDelay: "0.6s" }} />
+        {/* Wordmark */}
+        <h1 className="loader-text font-syne font-extrabold text-foreground tracking-[0.15em] relative z-10" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
+          MACROVIEW
+        </h1>
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-hidden">
@@ -128,20 +160,25 @@ const Index = () => {
       </a>
 
       {/* §01 — Hero */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-4 text-center">
-        <div className="mb-6">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-4 text-center overflow-hidden">
+        {/* Atmospheric glow */}
+        <div className="glow-hero" />
+        <div className="smoke-drift parallax-orb" style={{ top: "10%", left: "15%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 40% / 0.12), transparent 70%)" }} />
+        <div className="smoke-drift-alt parallax-orb" style={{ top: "60%", right: "10%", width: 400, height: 400, background: "radial-gradient(circle, hsl(242 95% 50% / 0.08), transparent 70%)" }} />
+
+        <div className="mb-6 relative z-10">
           <h1 className="font-syne font-extrabold uppercase leading-[0.9]" style={{ fontSize: "clamp(3rem, 10vw, 10rem)" }}>
             <span className="hero-macro inline-block opacity-0">MACRO</span>
             <span className="hero-view inline-block opacity-0">VIEW</span>
           </h1>
         </div>
-        <p className="hero-tagline opacity-0 font-syne font-bold text-foreground mb-3" style={{ fontSize: "clamp(1rem, 2vw, 1.5rem)" }}>
+        <p className="hero-tagline opacity-0 font-syne font-bold text-foreground mb-3 relative z-10" style={{ fontSize: "clamp(1rem, 2vw, 1.5rem)" }}>
           Scale your content. Own your market.
         </p>
-        <p className="hero-sub opacity-0 text-muted-foreground font-light max-w-lg" style={{ fontSize: "clamp(0.85rem, 1.2vw, 1.1rem)" }}>
+        <p className="hero-sub opacity-0 text-muted-foreground font-light max-w-lg relative z-10" style={{ fontSize: "clamp(0.85rem, 1.2vw, 1.1rem)" }}>
           A full-stack creative studio for content creators ready to grow.
         </p>
-        <div className="hero-buttons opacity-0 flex gap-4 mt-8 flex-wrap justify-center">
+        <div className="hero-buttons opacity-0 flex gap-4 mt-8 flex-wrap justify-center relative z-10">
           <a href="#book" className="bg-primary text-primary-foreground font-syne font-bold px-8 py-3 rounded-md text-sm tracking-wide hover:brightness-125 transition">
             Book a Call →
           </a>
@@ -166,7 +203,10 @@ const Index = () => {
       </div>
 
       {/* §03 — The Problem */}
-      <section className="max-w-4xl mx-auto px-6 py-28 md:py-36">
+      <section className="relative max-w-4xl mx-auto px-6 py-28 md:py-36">
+        {/* Smoke accent */}
+        <div className="smoke-drift parallax-orb" style={{ top: "-20%", right: "-15%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 35% / 0.1), transparent 70%)" }} />
+
         <p className="gsap-fade-up text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ THE PROBLEM</p>
         <h2 className="gsap-fade-up font-syne font-bold text-foreground mb-12" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
           Great content doesn't post itself.
@@ -195,20 +235,26 @@ const Index = () => {
             One studio. Full pipeline. Zero bottlenecks.
           </h2>
         </div>
-        {/* Desktop horizontal reel */}
+        {/* Desktop horizontal reel — 3D cards */}
         <div ref={reelInnerRef} className="hidden md:flex gap-8 pl-8 pr-[20vw]">
-          {services.map((s) => (
-            <div key={s.num} className="flex-shrink-0 relative rounded-xl overflow-hidden flex flex-col justify-end p-8" style={{ width: "80vw", height: "70vh", background: "hsl(var(--card))" }}>
+          {services.map((s, i) => (
+            <div
+              key={s.num}
+              className={`flex-shrink-0 relative rounded-xl overflow-hidden flex flex-col justify-end p-8 ${i % 2 === 0 ? "card-3d" : "card-3d card-3d-alt"}`}
+              style={{ width: "80vw", height: "70vh", background: "hsl(var(--card))" }}
+            >
               <span className="absolute top-6 left-8 font-syne font-bold text-primary/20" style={{ fontSize: "5rem" }}>{s.num}</span>
-              <h3 className="font-syne font-bold text-foreground text-2xl md:text-3xl mb-3">{s.title}</h3>
-              <p className="text-muted-foreground font-light max-w-md" style={{ lineHeight: 1.8 }}>{s.desc}</p>
+              {/* Subtle glow inside card */}
+              <div className="absolute top-0 right-0 w-1/2 h-1/2 pointer-events-none" style={{ background: "radial-gradient(circle at top right, hsl(242 95% 50% / 0.06), transparent 70%)" }} />
+              <h3 className="font-syne font-bold text-foreground text-2xl md:text-3xl mb-3 relative z-10">{s.title}</h3>
+              <p className="text-muted-foreground font-light max-w-md relative z-10" style={{ lineHeight: 1.8 }}>{s.desc}</p>
             </div>
           ))}
         </div>
-        {/* Mobile stacked cards */}
+        {/* Mobile stacked cards — 3D */}
         <div className="md:hidden px-6 space-y-6 pb-12" data-stagger>
-          {services.map((s) => (
-            <div key={s.num} data-stagger-child className="opacity-0 relative rounded-xl p-6" style={{ background: "hsl(var(--card))" }}>
+          {services.map((s, i) => (
+            <div key={s.num} data-stagger-child className={`opacity-0 relative rounded-xl p-6 card-3d ${i % 2 !== 0 ? "card-3d-alt" : ""}`} style={{ background: "hsl(var(--card))" }}>
               <span className="font-syne font-bold text-primary/20 text-5xl absolute top-4 left-6">{s.num}</span>
               <div className="pt-14">
                 <h3 className="font-syne font-bold text-foreground text-xl mb-2">{s.title}</h3>
@@ -223,8 +269,12 @@ const Index = () => {
       </section>
 
       {/* §05 — Proof Block */}
-      <section className="bg-primary py-24 md:py-32">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-0">
+      <section className="relative bg-primary py-24 md:py-32 overflow-hidden">
+        {/* Atmospheric smoke on proof */}
+        <div className="smoke-drift-alt" style={{ top: "-30%", left: "20%", width: 600, height: 600, background: "radial-gradient(circle, hsl(242 95% 60% / 0.12), transparent 70%)" }} />
+        <div className="smoke-drift" style={{ bottom: "-20%", right: "10%", width: 400, height: 400, background: "radial-gradient(circle, hsl(240 100% 80% / 0.08), transparent 70%)" }} />
+
+        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-12 md:gap-0 relative z-10">
           {[
             { val: "48", label: "Average delivery turnaround", attr: "48" },
             { val: "3", label: "Average client content growth", attr: "3" },
@@ -239,13 +289,15 @@ const Index = () => {
             </div>
           ))}
         </div>
-        <p className="text-center text-primary-foreground font-light text-sm mt-12 opacity-80">
+        <p className="text-center text-primary-foreground font-light text-sm mt-12 opacity-80 relative z-10">
           These aren't promises. They're our average.
         </p>
       </section>
 
       {/* §06 — Origin / Trust */}
-      <section className="max-w-4xl mx-auto px-6 py-28 md:py-36">
+      <section className="relative max-w-4xl mx-auto px-6 py-28 md:py-36">
+        <div className="smoke-drift parallax-orb" style={{ top: "20%", left: "-20%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 35% / 0.08), transparent 70%)" }} />
+
         <p className="gsap-fade-up text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ WHY MACROVIEW</p>
         <h2 className="gsap-fade-up font-syne font-bold text-foreground mb-8" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
           We built what we wish existed.
@@ -288,14 +340,21 @@ const Index = () => {
       </section>
 
       {/* §08 — Testimonials */}
-      <section className="max-w-5xl mx-auto px-6 py-20 md:py-28">
+      <section className="relative max-w-5xl mx-auto px-6 py-20 md:py-28">
+        <div className="smoke-drift-alt parallax-orb" style={{ top: "10%", right: "-10%", width: 400, height: 400, background: "radial-gradient(circle, hsl(242 95% 45% / 0.08), transparent 70%)" }} />
+
         <p className="gsap-fade-up text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ CLIENT RESULTS</p>
         <h2 className="gsap-fade-up font-syne font-bold text-foreground mb-12" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
           Don't take our word for it.
         </h2>
         <div className="grid md:grid-cols-3 gap-6" data-stagger>
           {testimonials.map((t, i) => (
-            <div key={i} data-stagger-child className="opacity-0 rounded-xl p-6 md:p-8" style={{ background: "hsl(0 0% 10%)", border: "1px solid hsl(var(--border) / 0.25)" }}>
+            <div
+              key={i}
+              data-stagger-child
+              className={`opacity-0 rounded-xl p-6 md:p-8 relative card-3d ${i % 2 !== 0 ? "card-3d-alt" : ""}`}
+              style={{ background: "hsl(0 0% 10%)", border: "1px solid hsl(var(--border) / 0.25)" }}
+            >
               <p className="text-foreground font-light mb-6" style={{ fontSize: "1.05rem", lineHeight: 1.9 }}>
                 "{t.quote}"
               </p>
@@ -322,7 +381,7 @@ const Index = () => {
               {[...Array(12)].map((_, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 rounded-lg flex items-center justify-center mx-2 border border-transparent hover:border-primary transition-colors group"
+                  className="tile-3d flex-shrink-0 rounded-lg flex items-center justify-center mx-2 border border-transparent hover:border-primary transition-colors group"
                   style={{ width: 280, height: 180, background: "hsl(0 0% 12%)" }}
                 >
                   <span className="text-muted-foreground text-xs tracking-[0.2em] uppercase group-hover:text-foreground transition-colors">PROJECT PLACEHOLDER</span>
@@ -334,25 +393,29 @@ const Index = () => {
       </section>
 
       {/* §10 — The Close */}
-      <section id="book" className="close-section min-h-screen flex flex-col items-center justify-center px-6 text-center relative">
-        <div className="mb-8">
+      <section id="book" className="close-section relative min-h-screen flex flex-col items-center justify-center px-6 text-center overflow-hidden">
+        {/* Atmospheric glow */}
+        <div className="glow-orb parallax-orb" style={{ top: "20%", left: "30%", width: 600, height: 600, background: "radial-gradient(circle, hsl(242 95% 35% / 0.12), transparent 70%)", filter: "blur(100px)" }} />
+        <div className="smoke-drift-alt" style={{ bottom: "10%", right: "20%", width: 400, height: 400, background: "radial-gradient(circle, hsl(242 95% 50% / 0.06), transparent 70%)" }} />
+
+        <div className="mb-8 relative z-10">
           <p className="close-line opacity-0 font-syne font-extrabold text-foreground leading-tight" style={{ fontSize: "clamp(2rem, 7vw, 5rem)" }}>Your content should be</p>
           <p className="close-line opacity-0 font-syne font-extrabold text-foreground leading-tight" style={{ fontSize: "clamp(2rem, 7vw, 5rem)" }}>working harder</p>
           <p className="close-line opacity-0 font-syne font-extrabold text-foreground leading-tight" style={{ fontSize: "clamp(2rem, 7vw, 5rem)" }}>than you are.</p>
         </div>
-        <p className="gsap-fade-up text-muted-foreground font-light max-w-xl mb-4" style={{ fontSize: "clamp(0.9rem, 1.1vw, 1.1rem)", lineHeight: 1.8 }}>
+        <p className="gsap-fade-up text-muted-foreground font-light max-w-xl mb-4 relative z-10" style={{ fontSize: "clamp(0.9rem, 1.1vw, 1.1rem)", lineHeight: 1.8 }}>
           MacroView handles the full pipeline — editing, strategy, uploads, AI systems — so you can focus on what only you can do.
         </p>
-        <p className="gsap-fade-up text-foreground font-light max-w-md mb-10" style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.15rem)" }}>
+        <p className="gsap-fade-up text-foreground font-light max-w-md mb-10 relative z-10" style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.15rem)" }}>
           Spots are limited. We work with a select number of clients each month.
         </p>
-        <a href="#book" className="gsap-fade-up bg-primary text-primary-foreground font-syne font-bold rounded-full px-12 py-4 text-lg tracking-wide hover:brightness-125 hover:scale-[1.02] transition-all shadow-lg">
+        <a href="#book" className="gsap-fade-up bg-primary text-primary-foreground font-syne font-bold rounded-full px-12 py-4 text-lg tracking-wide hover:brightness-125 hover:scale-[1.02] transition-all shadow-lg relative z-10">
           Book Your Free Strategy Call →
         </a>
-        <p className="gsap-fade-up text-muted-foreground font-light text-sm mt-6">
+        <p className="gsap-fade-up text-muted-foreground font-light text-sm mt-6 relative z-10">
           No commitment. 30 minutes. Walk away with a content plan.
         </p>
-        <div className="gsap-fade-up flex flex-col items-center gap-3 mt-10 text-muted-foreground text-sm font-light">
+        <div className="gsap-fade-up flex flex-col items-center gap-3 mt-10 text-muted-foreground text-sm font-light relative z-10">
           <span>hello@macroview.studio</span>
           <div className="flex gap-4">
             <a href="#" aria-label="Instagram" className="hover:text-foreground transition-colors">
