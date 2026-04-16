@@ -22,15 +22,11 @@ const testimonials = [
 ];
 
 const Index = () => {
-  const [loading, setLoading] = useState(true);
   const [navOpen, setNavOpen] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
   const [videoModal, setVideoModal] = useState<string | null>(null);
   const reelRef = useRef<HTMLDivElement>(null);
   const reelInnerRef = useRef<HTMLDivElement>(null);
-  const loaderRef = useRef<HTMLDivElement>(null);
-  const wheelRef = useRef<HTMLImageElement>(null);
-  const logoRef = useRef<HTMLDivElement>(null);
   const animsInitialized = useRef(false);
 
   // Always start at top on mount/refresh — disable browser scroll restoration
@@ -39,60 +35,8 @@ const Index = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Loading intro — triggers exit animation instead of instantly hiding
-  useEffect(() => {
-    const timer = setTimeout(() => startLoaderExit(), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const startLoaderExit = () => {
-    const gsap = window.gsap;
-    const loader = loaderRef.current;
-    const wheel = wheelRef.current;
-    const logo = logoRef.current;
-    if (!gsap || !loader || !wheel) { setLoading(false); return; }
-
-    // Kick hero animations immediately so logo fades in as spinner flies toward it
-    if (!animsInitialized.current && window.ScrollTrigger) {
-      animsInitialized.current = true;
-      initAnimations();
-    }
-
-    // 1. Fade the white background out
-    gsap.to(loader, { backgroundColor: "rgba(255,255,255,0)", duration: 0.55, ease: "power1.inOut" });
-
-    // 2. Pan spinner to the aperture wheel position on the logo
-    if (logo) {
-      const logoRect = logo.getBoundingClientRect();
-      const wheelRect = wheel.getBoundingClientRect();
-      // The camera aperture sits ~72% from left, ~30% from top of the logo image
-      const targetX = logoRect.left + logoRect.width * 0.72;
-      const targetY = logoRect.top + logoRect.height * 0.30;
-      const startX = wheelRect.left + wheelRect.width / 2;
-      const startY = wheelRect.top + wheelRect.height / 2;
-      const targetSize = Math.max(logoRect.width * 0.22, 28);
-      gsap.to(wheel, {
-        x: targetX - startX,
-        y: targetY - startY,
-        width: targetSize,
-        height: targetSize,
-        ease: "power2.inOut",
-        duration: 0.72,
-        delay: 0.08,
-      });
-    }
-
-    // 3. Fade the spinner out as it arrives
-    gsap.to(wheel, { opacity: 0, duration: 0.28, delay: 0.66 });
-
-    // 4. Remove loader overlay after animation finishes
-    gsap.delayedCall(1.05, () => setLoading(false));
-  };;
-
-
   // Custom cursor with lagging ring
   useEffect(() => {
-    if (loading) return;
     const dot = document.getElementById('cursor-dot');
     const ring = document.getElementById('cursor-ring');
     if (!dot || !ring) return;
@@ -124,25 +68,19 @@ const Index = () => {
       el.addEventListener('mouseleave', shrink);
     });
     return () => { window.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf); };
-  }, [loading]);
+  }, []);
 
   // Lenis smooth scroll + GSAP ScrollTrigger sync
   useEffect(() => {
-    if (loading) return;
     if (!window.Lenis) return;
     const lenis = new window.Lenis({ duration: 1.2, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smooth: true });
     const raf = (time: number) => { lenis.raf(time); requestAnimationFrame(raf); };
     requestAnimationFrame(raf);
-    if (window.ScrollTrigger) window.ScrollTrigger.scrollerProxy(document.documentElement, {
-      scrollTop: () => lenis.scroll,
-      getBoundingClientRect: () => ({ top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }),
-    });
     return () => lenis.destroy();
-  }, [loading]);
+  }, []);
 
   // Navbar hide on scroll down, show on scroll up
   useEffect(() => {
-    if (loading) return;
     let last = 0;
     const onScroll = () => {
       const y = window.scrollY;
@@ -151,11 +89,10 @@ const Index = () => {
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [loading]);
+  }, []);
 
   // Image lazy-load fade-in via IntersectionObserver
   useEffect(() => {
-    if (loading) return;
     const imgs = document.querySelectorAll<HTMLImageElement>('img[data-lazy]');
     if (!imgs.length) return;
     const io = new IntersectionObserver((entries) => {
@@ -170,10 +107,9 @@ const Index = () => {
     }, { rootMargin: '120px' });
     imgs.forEach(img => io.observe(img));
     return () => io.disconnect();
-  }, [loading]);
+  }, []);
 
   useEffect(() => {
-    if (loading) return;
     if (animsInitialized.current) return; // already started during exit animation
     const waitForGsap = setInterval(() => {
       if (window.gsap && window.ScrollTrigger) {
@@ -183,7 +119,7 @@ const Index = () => {
       }
     }, 100);
     return () => clearInterval(waitForGsap);
-  }, [loading]);
+  }, []);
 
   const initAnimations = () => {
     const gsap = window.gsap;
@@ -191,7 +127,9 @@ const Index = () => {
     gsap.registerPlugin(ScrollTrigger);
 
     // Hero entrance
+    gsap.set(".hero-macro, .hero-tagline, .hero-sub, .gsap-fade-up, .who-item, .who-closing, .close-line, [data-stagger-child]", { opacity: 0 });
     gsap.fromTo(".hero-macro", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 1.2, ease: "power3.out" });
+    gsap.fromTo(".hero-tagline", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, delay: 0.8, ease: "power2.out" });
     gsap.fromTo(".hero-sub", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, delay: 0.9, ease: "power2.out" });
     gsap.fromTo(".hero-video-panel", { opacity: 0 }, { opacity: 1, duration: 1.6, delay: 0.1, ease: "power2.out" });
 
@@ -373,22 +311,6 @@ const Index = () => {
 
   return (
     <div className="overflow-x-hidden">
-      {/* Loader overlay — stays in DOM until exit animation completes */}
-      {loading && (
-        <div
-          ref={loaderRef}
-          className="fixed inset-0 z-[10000] flex items-center justify-center"
-          style={{ backgroundColor: "#ffffff" }}
-        >
-          <img
-            ref={wheelRef}
-            src="/spining-wheel.png"
-            alt=""
-            className="loader-wheel"
-            style={{ width: 96, height: 96, objectFit: "contain", position: "relative", filter: "invert(1)" }}
-          />
-        </div>
-      )}
       {/* Scroll progress bar */}
       <div id="scroll-progress" />
       {/* Custom cursor */}
@@ -397,7 +319,10 @@ const Index = () => {
 
       {/* ── Top Nav Bar ── */}
       <nav className={`nav-bar fixed top-0 left-0 right-0 z-[9990] flex items-center justify-between px-4 sm:px-8 py-4 sm:py-5 transition-transform duration-400 ${navHidden ? "-translate-y-full" : "translate-y-0"}`}>
-        <span className="nav-logo-img font-bold text-foreground select-none" style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: "clamp(0.75rem, 1.1vw, 0.9rem)", letterSpacing: "-0.06em", lineHeight: 1 }}>Macro View Digital</span>
+        <div className="flex items-center gap-2 select-none">
+          <img src="/logo-no-bg.png" alt="" aria-hidden="true" style={{ height: "clamp(1.32rem, 1.76vw, 1.65rem)", width: "auto", objectFit: "contain" }} />
+          <span className="nav-logo-img text-foreground" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "clamp(0.75rem, 1.1vw, 0.9rem)", letterSpacing: "-0.02em", lineHeight: 1 }}>Macro View Digital</span>
+        </div>
         <button
           aria-label="Toggle menu"
           className="nav-menu-btn relative z-[9992] flex flex-col gap-[5px] p-2 group"
@@ -409,23 +334,24 @@ const Index = () => {
         </button>
       </nav>
 
+      {/* Backdrop — behind the drawer, outside its stacking context */}
+      <div
+        className={`fixed inset-0 z-[9990] transition-opacity duration-500 ${navOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        style={{ background: "hsl(0 0% 0% / 0.55)", backdropFilter: "blur(4px)" }}
+        onClick={() => setNavOpen(false)}
+      />
+
       {/* ── Slide-out Nav Drawer ── */}
       <div
-        className={`nav-drawer fixed top-0 right-0 bottom-0 z-[9991] flex flex-col justify-end pb-20 px-12 transition-all duration-500 ${navOpen ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"}`}
+        className={`nav-drawer fixed top-0 right-0 bottom-0 z-[9991] flex flex-col justify-end pb-20 px-12 transition-all duration-500 ${navOpen ? "translate-x-0" : "translate-x-full"}`}
         style={{ width: "min(420px, 90vw)", background: "#ffffff", borderLeft: "1px solid rgba(0,0,0,0.10)", color: "#111111" }}
       >
-        {/* Backdrop close */}
-        <div
-          className={`fixed inset-0 z-[-1] transition-opacity duration-500 ${navOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-          style={{ background: "hsl(0 0% 0% / 0.55)", backdropFilter: "blur(4px)" }}
-          onClick={() => setNavOpen(false)}
-        />
         <nav className="flex flex-col gap-2">
           {[
             { label: "Home", href: "#" },
             { label: "The Problem", href: "#solution" },
-            { label: "The Solution", href: "#solution" },
-            { label: "Why MacroView", href: "#solution" },
+            { label: "Your Solution", href: "#solution" },
+            { label: "Why Macro View Studio", href: "#solution" },
             { label: "Clients & Partners", href: "#book" },
             { label: "Results", href: "#book" },
             { label: "Work & Projects", href: "#book" },
@@ -435,14 +361,16 @@ const Index = () => {
               href={item.href}
               onClick={() => setNavOpen(false)}
               className="nav-link font-syne font-bold transition-colors duration-200 py-3 border-b block uppercase"
-              style={{ fontSize: "clamp(1.6rem, 4vw, 2.4rem)", color: "#111111", borderBottomColor: "rgba(0,0,0,0.08)", transitionDelay: navOpen ? `${i * 55}ms` : "0ms", transform: navOpen ? "translateX(0)" : "translateX(24px)", opacity: navOpen ? 1 : 0, transition: `color 0.2s, transform 0.4s ${i * 55}ms, opacity 0.4s ${i * 55}ms` }}
+              style={{ fontSize: "clamp(1.1rem, 3vw, 1.6rem)", color: "#111111", whiteSpace: "nowrap", borderBottomColor: "rgba(0,0,0,0.08)", transitionDelay: navOpen ? `${i * 55}ms` : "0ms", transform: navOpen ? "translateX(0)" : "translateX(24px)", opacity: navOpen ? 1 : 0, transition: `color 0.2s, transform 0.4s ${i * 55}ms, opacity 0.4s ${i * 55}ms` }}
             >
               {item.label}
             </a>
           ))}
         </nav>
         <a
-          href="#book"
+          href="https://mail.google.com/mail/?view=cm&to=MacroViewDigital@gmail.com&su=Booking%20Inquiry"
+          target="_blank"
+          rel="noopener noreferrer"
           onClick={() => setNavOpen(false)}
           className="mt-10 font-syne font-bold text-sm tracking-wide underline underline-offset-4 transition-opacity hover:opacity-60"
           style={{ color: "#111111" }}
@@ -453,13 +381,10 @@ const Index = () => {
       </div>
 
       {/* §01 — Hero */}
-      <section className="relative min-h-screen overflow-hidden">
-        {/* Atmospheric glow */}
-        <div className="glow-hero" />
-        <div className="smoke-drift parallax-orb" style={{ top: "10%", left: "5%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 40% / 0.12), transparent 70%)" }} />
+      <section className="relative min-h-screen overflow-hidden no-grid">
 
         {/* ── Full-screen background video ── */}
-        <div className="hero-video-panel absolute inset-0 opacity-0">
+        <div className="absolute inset-0" style={{ zIndex: 1 }}>
           <video
             className="absolute inset-0 w-full h-full object-cover"
             src="/bg-video-landing.mp4"
@@ -472,8 +397,8 @@ const Index = () => {
 
         {/* Left-to-transparent readability gradient */}
         <div
-          className="absolute inset-0 z-[1] pointer-events-none"
-          style={{ background: "linear-gradient(to right, hsl(0 0% 4% / 0.92) 0%, hsl(0 0% 4% / 0.62) 52%, transparent 82%)" }}
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(to right, hsl(0 0% 4% / 0.92) 0%, hsl(0 0% 4% / 0.62) 52%, transparent 82%)", zIndex: 2 }}
         />
 
         {/* ── Text overlay ── */}
@@ -513,8 +438,11 @@ const Index = () => {
       </section>
 
       {/* §03 — The Problem */}
-      <section id="problem" className="relative max-w-6xl mx-auto px-6 py-28 md:py-36 scroll-snap-section">
+      <section id="problem" className="problem-section relative max-w-6xl mx-auto px-6 py-28 md:py-36 scroll-snap-section">
         <div className="smoke-drift parallax-orb" style={{ top: "-20%", right: "-15%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 35% / 0.1), transparent 70%)" }} />
+        {/* Decorative cross watermarks */}
+        <div className="geo-cross geo-float-b" style={{ width: 60, height: 60, top: "8%", right: "4%", color: "hsl(242 95% 70% / 0.07)", zIndex: 0 }} />
+        <div className="geo-cross" style={{ width: 18, height: 18, bottom: "12%", left: "2%", color: "hsl(242 95% 70% / 0.08)", zIndex: 0 }} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 lg:gap-16 items-center">
 
@@ -522,7 +450,7 @@ const Index = () => {
           <div>
             <p className="prob-pan text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ THE PROBLEM</p>
             <h2 className="prob-pan font-syne font-bold text-foreground mb-12" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
-              Great content doesn't post itself.
+              Great <span className="highlight-word">content</span> doesn't post itself.
             </h2>
             <div className="space-y-6">
               {[
@@ -553,15 +481,28 @@ const Index = () => {
         </div>
       </section>
 
-      <hr className="iso-divider" />
+      {/* Problem → Solution crossfade */}
+      <div className="pointer-events-none" style={{
+        position: "relative",
+        height: 160,
+        marginTop: -160,
+        background: "linear-gradient(to bottom, transparent 0%, hsl(0 0% 8.2%) 100%)",
+        zIndex: 10,
+      }} />
 
       {/* §04 — The Solution */}
-      <section id="solution" className="relative">
+      <section id="solution" className="solution-section relative">
+        {/* Solution top fade */}
+        <div className="absolute inset-x-0 top-0 pointer-events-none" style={{
+          height: 160,
+          background: "linear-gradient(to bottom, hsl(0 0% 8.2%) 0%, transparent 100%)",
+          zIndex: 5,
+        }} />
         {/* Header — outside the pin so it's always visible as user approaches */}
-        <div className="max-w-4xl mx-auto px-6 pt-20 pb-10">
-          <p className="gsap-fade-up text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ THE SOLUTION</p>
+        <div className="max-w-6xl mx-auto px-6 pt-28 pb-10 md:pt-36">
+          <p className="gsap-fade-up text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ YOUR SOLUTION</p>
           <h2 className="gsap-fade-up font-syne font-bold text-foreground mb-4" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
-            One studio. Full pipeline. Zero bottlenecks.
+            One Studio. Full Pipeline.<br /><span className="highlight-word">Total Control.</span>
           </h2>
           <p className="gsap-fade-up text-muted-foreground font-light" style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.15rem)" }}>
             Everything above. One team. One retainer.
@@ -620,7 +561,7 @@ const Index = () => {
         {/* Mobile stacked cards */}
         <div className="md:hidden px-6 space-y-6 pb-12" data-stagger>
           {services.map((s, i) => (
-            <div key={s.num} data-stagger-child className={`group opacity-0 relative rounded-xl overflow-hidden p-6 card-3d ${i % 2 !== 0 ? "card-3d-alt" : ""}`} style={{ background: "hsl(var(--card))", minHeight: 280 }}>
+            <div key={s.num} data-stagger-child className={`group relative rounded-xl overflow-hidden p-6 card-3d ${i % 2 !== 0 ? "card-3d-alt" : ""}`} style={{ background: "hsl(var(--card))", minHeight: 280 }}>
               <span className="font-syne font-bold text-primary/20 text-5xl absolute top-4 left-6">{s.num}</span>
               <div
                 className="mt-12 mb-4 rounded-lg flex flex-col items-center justify-center gap-2"
@@ -643,6 +584,8 @@ const Index = () => {
         {/* Atmospheric smoke on proof */}
         <div className="smoke-drift-alt" style={{ top: "-30%", left: "20%", width: 600, height: 600, background: "radial-gradient(circle, hsl(242 95% 60% / 0.12), transparent 70%)" }} />
         <div className="smoke-drift" style={{ bottom: "-20%", right: "10%", width: 400, height: 400, background: "radial-gradient(circle, hsl(240 100% 80% / 0.08), transparent 70%)" }} />
+        {/* Dot grid texture */}
+        <div className="dot-grid" style={{ opacity: 0.35 }} />
 
         <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-6 relative z-10">
           {[
@@ -666,13 +609,16 @@ const Index = () => {
       {/* §06 — Why MacroView */}
       <section className="relative py-20 md:py-28">
           <div className="smoke-drift parallax-orb" style={{ top: "20%", left: "-20%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 35% / 0.08), transparent 70%)" }} />
+          {/* Decorative circle outline */}
+          <div className="absolute geo-float-a pointer-events-none" style={{ width: 300, height: 300, top: "0%", right: "-2%", border: "1px solid hsl(242 95% 70% / 0.05)", borderRadius: "50%", zIndex: 0 }} />
+          <div className="geo-cross geo-float-b" style={{ width: 22, height: 22, bottom: "8%", right: "12%", color: "hsl(242 95% 70% / 0.08)", zIndex: 0 }} />
           <div className="max-w-4xl mx-auto px-6">
-            <p className="text-xs tracking-[0.3em] uppercase mb-6 font-light text-muted-foreground">/ WHY MACROVIEW</p>
+            <p className="text-xs tracking-[0.3em] uppercase mb-6 font-light text-muted-foreground">/ WHY MACRO VIEW STUDIO</p>
             <h2
               className="font-syne font-bold mb-8 text-foreground"
               style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}
             >
-              We built what we wish existed.
+              We <span className="highlight-word">built</span> what we wish existed.
             </h2>
             <div className="border-l-2 border-primary pl-6">
               <p
@@ -688,7 +634,7 @@ const Index = () => {
                   key={i}
                   data-stagger-child
                   onClick={() => setVideoModal(m)}
-                  className="opacity-0 btn-glass text-xs tracking-[0.15em] rounded-full px-4 py-2 font-light flex items-center gap-2 group"
+                  className="btn-glass text-xs tracking-[0.15em] rounded-full px-4 py-2 font-light flex items-center gap-2 group"
                 >
                   <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" className="opacity-60 group-hover:opacity-100 transition-opacity">
                     <path d="M2 1.5l6 3.5-6 3.5z" />
@@ -706,7 +652,7 @@ const Index = () => {
         <section className="max-w-4xl mx-auto px-6 pt-24 md:pt-32 pb-16 md:pb-24">
           <p className="gsap-fade-up text-xs tracking-[0.3em] uppercase mb-6 font-light text-muted-foreground">/ WHO WE WORK WITH</p>
           <h2 className="gsap-fade-up font-syne font-bold mb-12 text-foreground" style={{ fontSize: "clamp(1.8rem, 4.5vw, 3.5rem)" }}>
-            MacroView is for creators who are done playing small.
+            For creators who <span className="highlight-word">outgrew</span> the tools they started with.
           </h2>
           <div className="space-y-5 who-list">
             {[
@@ -715,12 +661,12 @@ const Index = () => {
               "Founders who want content running without touching it daily",
               "Organizations ready to invest in long-term content growth",
             ].map((line, i) => (
-              <p key={i} className="who-item opacity-0 border-l-2 border-primary pl-5 font-light text-foreground" style={{ fontSize: "clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight: 1.8 }}>
+              <p key={i} className="who-item border-l-2 border-primary pl-5 font-light text-foreground" style={{ fontSize: "clamp(0.95rem, 1.1vw, 1.1rem)", lineHeight: 1.8 }}>
                 {line}
               </p>
             ))}
           </div>
-          <p className="who-closing opacity-0 font-light text-sm mt-10 text-muted-foreground">
+          <p className="who-closing font-light text-sm mt-10 text-muted-foreground">
             If you're looking for the cheapest option, we're probably not the right fit. If you want results, let's talk.
           </p>
         </section>
@@ -782,36 +728,99 @@ const Index = () => {
       </section>
 
       {/* §10 — The Close */}
-      <section id="book" className="close-section relative min-h-screen flex flex-col items-center justify-center px-6 text-center overflow-hidden" style={{ background: "rgb(21,21,21)" }}>
-        {/* Atmospheric glow */}
-        <div className="glow-orb parallax-orb" style={{ top: "20%", left: "30%", width: 600, height: 600, background: "radial-gradient(circle, hsl(242 95% 35% / 0.12), transparent 70%)", filter: "blur(100px)" }} />
-        <div className="smoke-drift-alt" style={{ bottom: "10%", right: "20%", width: 400, height: 400, background: "radial-gradient(circle, hsl(242 95% 50% / 0.06), transparent 70%)" }} />
+      <section id="book" className="close-section relative min-h-screen flex flex-col overflow-hidden no-grid" style={{ background: "hsl(0, 0%, 8.2%)" }}>
 
-        <div className="mb-8 relative z-10">
-          <p className="close-line opacity-0 font-syne font-extrabold text-foreground leading-tight" style={{ fontSize: "clamp(1.6rem, 5.6vw, 4rem)" }}>Your content should be</p>
-          <p className="close-line opacity-0 font-syne font-extrabold text-foreground leading-tight" style={{ fontSize: "clamp(1.6rem, 5.6vw, 4rem)" }}>working harder</p>
-          <p className="close-line opacity-0 font-syne font-extrabold text-foreground leading-tight" style={{ fontSize: "clamp(1.6rem, 5.6vw, 4rem)" }}>than you are.</p>
+        {/* Blue glow — full section coverage, screen blend, fades at top edges only */}
+        <img
+          src="/blue-glow.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute pointer-events-none"
+          style={{
+            top: 0, left: "50%", transform: "translateX(-50%)",
+            width: "140%", height: "100%", objectFit: "cover", objectPosition: "center bottom",
+            mixBlendMode: "screen", opacity: 0.95, zIndex: 1,
+            WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 12%, black 28%, black 100%)",
+            maskImage: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 12%, black 28%, black 100%)",
+          }}
+        />
+
+        {/* Upper heading — left aligned, asterisk + full heading image side by side */}
+        <div className="relative z-10 w-full px-8 sm:px-16 pt-16 sm:pt-24" style={{ zIndex: 5 }}>
+          <div className="relative flex items-center justify-center">
+            <img
+              src="/asterisk.png"
+              alt=""
+              aria-hidden="true"
+              className="close-line flex-shrink-0 absolute"
+              style={{ width: "clamp(3rem, 8vw, 6rem)", height: "clamp(3rem, 8vw, 6rem)", objectFit: "contain", left: "0", zIndex: 0 }}
+            />
+            <img
+              src="/your-content-cta.png"
+              alt="Your content should be working harder than you are."
+              className="close-line"
+              style={{ height: "clamp(7rem, 18vw, 14rem)", width: "auto", objectFit: "contain" }}
+            />
+          </div>
         </div>
-        <p className="gsap-fade-up text-muted-foreground font-light max-w-xl mb-4 relative z-10" style={{ fontSize: "clamp(0.9rem, 1.1vw, 1.1rem)", lineHeight: 1.8 }}>
-          MacroView handles the full pipeline — editing, strategy, uploads, AI systems — so you can focus on what only you can do.
-        </p>
-        <p className="gsap-fade-up text-foreground font-light max-w-md mb-10 relative z-10" style={{ fontSize: "clamp(0.95rem, 1.2vw, 1.15rem)" }}>
-          Spots are limited. We work with a select number of clients each month.
-        </p>
-        <a href="#book" className="gsap-fade-up bg-primary text-primary-foreground font-syne font-bold rounded-full px-8 sm:px-12 py-4 text-base sm:text-lg tracking-wide hover:brightness-125 hover:scale-[1.02] transition-all shadow-lg relative z-10">
-          Book Your Free Strategy Call →
-        </a>
-        <p className="gsap-fade-up text-muted-foreground font-light text-sm mt-6 relative z-10">
-          No commitment. 30 minutes. Walk away with a content plan.
-        </p>
-        <div className="gsap-fade-up flex flex-col items-center gap-3 mt-10 text-muted-foreground text-sm font-light relative z-10">
-          <span>hello@macroview.studio</span>
-          <div className="flex gap-4">
-            <a href="#" aria-label="Instagram" className="hover:text-foreground transition-colors">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="5" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Bottom dome */}
+        <div className="close-dome" />
+
+        {/* Logo + CTA overlaid on dome */}
+        <div className="close-dome-content">
+          <img
+            src="/logo-no-bg.png"
+            alt="MacroView"
+            className="gsap-fade-up logo-breathe"
+            style={{ width: "clamp(9rem, 18vw, 14rem)", height: "auto", marginBottom: "0.5rem" }}
+          />
+          <a
+            href="https://mail.google.com/mail/?view=cm&to=MacroViewDigital@gmail.com&su=Booking%20Inquiry"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="gsap-fade-up"
+            aria-label="Book Now"
+          >
+            <img
+              src="/book-now-btn.png"
+              alt="Book Now"
+              style={{ height: "clamp(2.4rem, 4vw, 3.2rem)", width: "auto" }}
+            />
+          </a>
+          {/* Social links */}
+          <div className="gsap-fade-up mt-5 flex items-center gap-5">
+            <a
+              href="https://www.instagram.com/macroviewdigital"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors text-xs tracking-wide"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {/* Instagram icon */}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="0.01" fill="currentColor" strokeWidth="2.5"/>
+              </svg>
+              @macroviewdigital
             </a>
-            <a href="#" aria-label="Facebook" className="hover:text-foreground transition-colors">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" /></svg>
+            <span className="text-muted-foreground opacity-40">·</span>
+            <a
+              href="https://www.facebook.com/macroviewdigital"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-muted-foreground hover:text-white transition-colors text-xs tracking-wide"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {/* Facebook icon */}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+              </svg>
+              macroviewdigital
             </a>
           </div>
         </div>
