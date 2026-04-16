@@ -320,8 +320,8 @@ const Index = () => {
       {/* ── Top Nav Bar ── */}
       <nav className={`nav-bar fixed top-0 left-0 right-0 z-[9990] flex items-center justify-between px-4 sm:px-8 py-4 sm:py-5 transition-transform duration-400 ${navHidden ? "-translate-y-full" : "translate-y-0"}`}>
         <div className="flex items-center gap-2 select-none">
-          <img src="/logo-no-bg.png" alt="" aria-hidden="true" style={{ height: "clamp(1.32rem, 1.76vw, 1.65rem)", width: "auto", objectFit: "contain" }} />
-          <span className="nav-logo-img text-foreground" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "clamp(0.75rem, 1.1vw, 0.9rem)", letterSpacing: "-0.02em", lineHeight: 1 }}>Macro View Digital</span>
+          <img src="/logo-no-bg.png" alt="" aria-hidden="true" className="nav-logo-img flex-shrink-0" style={{ height: "clamp(1.32rem, 1.76vw, 1.65rem)", width: "auto", objectFit: "contain", display: "block" }} />
+          <span className="text-foreground" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: "clamp(0.75rem, 1.1vw, 0.9rem)", letterSpacing: "-0.02em", lineHeight: 1 }}>Macro View Digital</span>
         </div>
         <button
           aria-label="Toggle menu"
@@ -343,7 +343,7 @@ const Index = () => {
 
       {/* ── Slide-out Nav Drawer ── */}
       <div
-        className={`nav-drawer fixed top-0 right-0 bottom-0 z-[9991] flex flex-col justify-end pb-20 px-12 transition-all duration-500 ${navOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`nav-drawer fixed top-0 right-0 bottom-0 z-[9991] flex flex-col justify-start pt-24 sm:pt-28 pb-16 sm:pb-20 px-8 sm:px-12 transition-all duration-500 ${navOpen ? "translate-x-0" : "translate-x-full"}`}
         style={{ width: "min(420px, 90vw)", background: "#ffffff", borderLeft: "1px solid rgba(0,0,0,0.10)", color: "#111111" }}
       >
         <nav className="flex flex-col gap-2">
@@ -438,7 +438,7 @@ const Index = () => {
       </section>
 
       {/* §03 — The Problem */}
-      <section id="problem" className="problem-section relative max-w-6xl mx-auto px-6 py-28 md:py-36 scroll-snap-section">
+      <section id="problem" className="problem-section relative max-w-6xl mx-auto px-6 py-20 sm:py-28 md:py-36 scroll-snap-section">
         <div className="smoke-drift parallax-orb" style={{ top: "-20%", right: "-15%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 35% / 0.1), transparent 70%)" }} />
         {/* Decorative cross watermarks */}
         <div className="geo-cross geo-float-b" style={{ width: 60, height: 60, top: "8%", right: "4%", color: "hsl(242 95% 70% / 0.07)", zIndex: 0 }} />
@@ -499,7 +499,7 @@ const Index = () => {
           zIndex: 5,
         }} />
         {/* Header — outside the pin so it's always visible as user approaches */}
-        <div className="max-w-6xl mx-auto px-6 pt-28 pb-10 md:pt-36">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-8 sm:pb-10 md:pt-36">
           <p className="gsap-fade-up text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ YOUR SOLUTION</p>
           <h2 className="gsap-fade-up font-syne font-bold text-foreground mb-4" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
             One Studio. Full Pipeline.<br /><span className="highlight-word">Total Control.</span>
@@ -559,7 +559,7 @@ const Index = () => {
           </div>
         </div>
         {/* Mobile stacked cards */}
-        <div className="md:hidden px-6 space-y-6 pb-12" data-stagger>
+        <div className="md:hidden px-4 sm:px-6 space-y-5 pt-4 pb-12" data-stagger>
           {services.map((s, i) => (
             <div key={s.num} data-stagger-child className={`group relative rounded-xl overflow-hidden p-6 card-3d ${i % 2 !== 0 ? "card-3d-alt" : ""}`} style={{ background: "hsl(var(--card))", minHeight: 280 }}>
               <span className="font-syne font-bold text-primary/20 text-5xl absolute top-4 left-6">{s.num}</span>
@@ -580,20 +580,20 @@ const Index = () => {
       </section>
 
       {/* §05 — Proof Block */}
-      <section className="grain-dark relative bg-primary py-24 md:py-32 overflow-hidden">
+      <section className="grain-dark relative bg-primary py-16 sm:py-24 md:py-32 overflow-hidden">
         {/* Atmospheric smoke on proof */}
         <div className="smoke-drift-alt" style={{ top: "-30%", left: "20%", width: 600, height: 600, background: "radial-gradient(circle, hsl(242 95% 60% / 0.12), transparent 70%)" }} />
         <div className="smoke-drift" style={{ bottom: "-20%", right: "10%", width: 400, height: 400, background: "radial-gradient(circle, hsl(240 100% 80% / 0.08), transparent 70%)" }} />
         {/* Dot grid texture */}
         <div className="dot-grid" style={{ opacity: 0.35 }} />
 
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-center gap-6 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-center gap-2 sm:gap-6 relative z-10">
           {[
             { val: "48", label: "Average delivery turnaround", attr: "48" },
             { val: "3", label: "Average client content growth", attr: "3" },
             { val: "100", label: "Revision commitment, every time", attr: "100" },
           ].map((stat, i) => (
-            <div key={i} className="flex-1 text-center px-6 py-8">
+            <div key={i} className="proof-stat flex-1 text-center px-6 py-6 sm:py-8">
               <p data-countup={stat.attr} className="font-syne font-extrabold text-primary-foreground" style={{ fontSize: "clamp(3rem, 6vw, 5rem)" }}>
                 {stat.attr === "48" ? "0HR" : stat.attr === "3" ? "0X" : "0%"}
               </p>
@@ -607,7 +607,7 @@ const Index = () => {
       </section>
 
       {/* §06 — Why MacroView */}
-      <section className="relative py-20 md:py-28">
+      <section className="relative py-14 sm:py-20 md:py-28">
           <div className="smoke-drift parallax-orb" style={{ top: "20%", left: "-20%", width: 500, height: 500, background: "radial-gradient(circle, hsl(242 95% 35% / 0.08), transparent 70%)" }} />
           {/* Decorative circle outline */}
           <div className="absolute geo-float-a pointer-events-none" style={{ width: 300, height: 300, top: "0%", right: "-2%", border: "1px solid hsl(242 95% 70% / 0.05)", borderRadius: "50%", zIndex: 0 }} />
@@ -649,7 +649,7 @@ const Index = () => {
 
 
         {/* §07 — Who This Is For */}
-        <section className="max-w-4xl mx-auto px-6 pt-24 md:pt-32 pb-16 md:pb-24">
+        <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-24 md:pt-32 pb-12 sm:pb-16 md:pb-24">
           <p className="gsap-fade-up text-xs tracking-[0.3em] uppercase mb-6 font-light text-muted-foreground">/ WHO WE WORK WITH</p>
           <h2 className="gsap-fade-up font-syne font-bold mb-12 text-foreground" style={{ fontSize: "clamp(1.8rem, 4.5vw, 3.5rem)" }}>
             For creators who <span className="highlight-word">outgrew</span> the tools they started with.
@@ -672,14 +672,14 @@ const Index = () => {
         </section>
 
         {/* §08 — Client Results */}
-        <section className="relative max-w-5xl mx-auto px-6 pb-20 md:pb-28">
+        <section className="relative max-w-5xl mx-auto px-4 sm:px-6 pb-14 sm:pb-20 md:pb-28">
           <div className="smoke-drift-alt parallax-orb" style={{ top: "10%", right: "-10%", width: 400, height: 400, background: "radial-gradient(circle, hsl(242 95% 45% / 0.06), transparent 70%)" }} />
 
           <p className="gsap-fade-up text-xs tracking-[0.3em] uppercase mb-6 font-light text-muted-foreground">/ CLIENT RESULTS</p>
           <h2 className="gsap-fade-up font-syne font-bold mb-12 text-foreground" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
             Don't take our word for it.
           </h2>
-          <div className="testi-iso-container grid md:grid-cols-3 gap-6">
+          <div className="testi-iso-container grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {testimonials.map((t, i) => {
               return (
                 <div
@@ -703,8 +703,8 @@ const Index = () => {
 
 
       {/* §09 — Work Tiles */}
-      <section className="py-20 md:py-28 overflow-hidden">
-        <div className="max-w-4xl mx-auto px-6 mb-12">
+      <section className="py-14 sm:py-20 md:py-28 overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 mb-10 sm:mb-12">
           <p className="gsap-fade-up text-xs tracking-[0.3em] text-muted-foreground uppercase mb-6 font-light">/ WORK</p>
           <h2 className="gsap-fade-up font-syne font-bold text-foreground" style={{ fontSize: "clamp(2rem, 5vw, 4rem)" }}>
             A few frames from the reel.
@@ -728,7 +728,7 @@ const Index = () => {
       </section>
 
       {/* §10 — The Close */}
-      <section id="book" className="close-section relative min-h-screen flex flex-col overflow-hidden no-grid" style={{ background: "hsl(0, 0%, 8.2%)" }}>
+      <section id="book" className="close-section relative min-h-[70vh] sm:min-h-screen flex flex-col overflow-hidden no-grid" style={{ background: "hsl(0, 0%, 8.2%)" }}>
 
         {/* Blue glow — full section coverage, screen blend, fades at top edges only */}
         <img
@@ -746,20 +746,20 @@ const Index = () => {
         />
 
         {/* Upper heading — left aligned, asterisk + full heading image side by side */}
-        <div className="relative z-10 w-full px-8 sm:px-16 pt-16 sm:pt-24" style={{ zIndex: 5 }}>
+        <div className="relative z-10 w-full px-4 sm:px-16 pt-10 sm:pt-24" style={{ zIndex: 5 }}>
           <div className="relative flex items-center justify-center">
             <img
               src="/asterisk.png"
               alt=""
               aria-hidden="true"
-              className="close-line flex-shrink-0 absolute"
+              className="close-line flex-shrink-0 absolute hidden sm:block"
               style={{ width: "clamp(3rem, 8vw, 6rem)", height: "clamp(3rem, 8vw, 6rem)", objectFit: "contain", left: "0", zIndex: 0 }}
             />
             <img
               src="/your-content-cta.png"
               alt="Your content should be working harder than you are."
               className="close-line"
-              style={{ height: "clamp(7rem, 18vw, 14rem)", width: "auto", objectFit: "contain" }}
+              style={{ height: "clamp(5.5rem, 18vw, 14rem)", width: "auto", maxWidth: "94vw", objectFit: "contain" }}
             />
           </div>
         </div>
