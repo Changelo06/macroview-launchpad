@@ -1180,9 +1180,10 @@
 .portfolio-cta-ceo-name {
   position: absolute;
   right: 0;
-  bottom: 22px;
+  bottom: 14px;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 14px;
+  line-height: 1;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--white-c);
@@ -1195,8 +1196,9 @@
   right: 0;
   bottom: 0;
   font-family: 'Space Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.22em;
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--blue);
   text-align: right;
@@ -1224,11 +1226,11 @@
   .portfolio-cta-ceo-name {
     font-size: 11px;
     letter-spacing: 0.12em;
-    bottom: 16px;
+    bottom: 11px;
   }
   .portfolio-cta-ceo-role {
-    font-size: 9px;
-    letter-spacing: 0.18em;
+    font-size: 7px;
+    letter-spacing: 0.14em;
   }
 }
 

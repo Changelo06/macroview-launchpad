@@ -86,10 +86,10 @@ export const PortfolioSection = () => (
             </h3>
           </div>
           <div className="portfolio-cta-ceo-wrap">
-            <span className="portfolio-cta-ceo-name">Mark Jason Marcelino</span>
+            <span className="portfolio-cta-ceo-name">Mark Jason</span>
             <img
               src="/CEO.svg"
-              alt="Mark Jason Marcelino — Owner of MVD"
+              alt="Mark Jason — Owner of MVD"
               className="portfolio-cta-ceo"
             />
             <span className="portfolio-cta-ceo-role">Owner of MVD</span>

@@ -20,7 +20,7 @@ const SERVICES = [
 export const SolutionSection = () => (
   <section id="solution" style={{ background: "var(--black)" }}>
     <img
-      src="/logo-main.svg"
+      src="/Macroview%20-%20Logo.svg"
       alt=""
       aria-hidden
       className="solution-bg-mark"

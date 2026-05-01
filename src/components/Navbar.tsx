@@ -20,7 +20,7 @@ export const Navbar = ({ scrolled }: NavbarProps) => {
         onClick={(e) => handleClick(e, "hero")}
       >
         <img
-          src="/logo-main.svg"
+          src="/Macroview%20-%20Logo.svg"
           alt=""
           aria-hidden
           className="nav-logo-mark"

@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { Loader } from "@/components/Loader";
+import { useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { ScrollDots } from "@/components/ScrollDots";
 import { CustomCursor } from "@/components/CustomCursor";
@@ -18,9 +17,8 @@ import { useScrollDots } from "@/hooks/useScrollDots";
 import { useSnapObserver } from "@/hooks/useSnapObserver";
 
 const Index = () => {
-  const [loaded, setLoaded] = useState(false);
   const { activeId, scrolled } = useScrollDots();
-  useSnapObserver("#snap-root", loaded);
+  useSnapObserver("#snap-root", true);
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -28,7 +26,6 @@ const Index = () => {
 
   return (
     <>
-      <Loader onDone={() => setLoaded(true)} />
       <GrainOverlay />
       <CustomCursor />
       <Navbar scrolled={scrolled} />
